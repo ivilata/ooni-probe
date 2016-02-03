@@ -85,3 +85,6 @@ def epochToTimestamp(seconds):
 
 def epochToUTC(seconds):
     return float(datetime.utcfromtimestamp(seconds).strftime("%s"))
+
+def epochToNewTimestamp(seconds):
+    return datetime.utcfromtimestamp(seconds).strftime("%Y-%m-%d %H:%M:%S")

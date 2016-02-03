@@ -3,6 +3,8 @@ import json
 import os
 import re
 
+from copy import deepcopy
+
 from datetime import datetime
 from contextlib import contextmanager
 
@@ -187,9 +189,9 @@ class YAMLReporter(OReporter):
         log.debug("Writing report with YAML reporter")
         content = '---\n'
         if isinstance(entry, Measurement):
-            report_entry = entry.testInstance.report
+            report_entry = deepcopy(entry.testInstance.report)
         elif isinstance(entry, dict):
-            report_entry = entry
+            report_entry = deepcopy(entry)
         else:
             raise Exception("Failed to serialise entry")
         content += safe_dump(report_entry)
@@ -252,11 +254,15 @@ class OONIBReporter(OReporter):
             if isinstance(entry, Measurement):
                 report_entry = {
                     'input': entry.testInstance.report.pop('input', None),
+                    'test_start_time': entry.testInstance.report.pop('test_start_time', None),
+                    'test_runtime': entry.testInstance.report.pop('test_runtime', None),
                     'test_keys': entry.testInstance.report
                 }
             elif isinstance(entry, dict):
                 report_entry = {
                     'input': entry.pop('input', None),
+                    'test_start_time': entry.pop('test_start_time', None),
+                    'test_runtime': entry.pop('test_runtime', None),
                     'test_keys': entry
                 }
             else:
@@ -565,6 +571,7 @@ class OONIBReportLog(object):
 
 
 class Report(object):
+    reportID = None
 
     def __init__(self, test_details, report_filename,
                  reportEntryManager, collector_address=None,
@@ -617,6 +624,7 @@ class Report(object):
                                                    self.collector_address)
 
         def created(report_id):
+            self.reportID = report_id
             if not self.oonib_reporter:
                 return
             return self.report_log.created(self.report_filename,

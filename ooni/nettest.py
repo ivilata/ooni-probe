@@ -443,6 +443,7 @@ class NetTest(object):
         self.testCases = net_test_loader.testCases
         self.testClasses = net_test_loader.testClasses
         self.testDetails = net_test_loader.testDetails
+        self.reportID = net_test_loader.reportID
 
         self.summary = {}
 
@@ -464,8 +465,8 @@ class NetTest(object):
             for test_class in self.testClasses:
                 test_instance = test_class()
                 test_instance.displaySummary(self.summary)
-        if self.testDetails["report_id"]:
-            print "Report ID: %s" % self.testDetails["report_id"]
+        if self.reportID:
+            print "Report ID: %s" % self.reportID
 
     def doneReport(self, report_results):
         """

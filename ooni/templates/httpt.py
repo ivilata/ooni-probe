@@ -1,9 +1,8 @@
 import random
 
-from twisted.internet import defer
-
 from txtorcon.interface import StreamListenerMixin
 
+from twisted.web.client import readBody, PartialDownloadError
 from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ClientEndpoint
 from ooni.utils.trueheaders import TrueHeadersAgent, TrueHeadersSOCKS5Agent
@@ -12,7 +11,7 @@ from ooni.nettest import NetTestCase
 from ooni.utils import log, base64Dict
 from ooni.settings import config
 
-from ooni.utils.net import BodyReceiver, StringProducer, userAgents
+from ooni.utils.net import StringProducer, userAgents
 from ooni.utils.trueheaders import TrueHeaders
 from ooni.errors import handleAllFailures
 
@@ -138,6 +137,7 @@ class HTTPTest(NetTestCase):
                     body = unicode(body, 'utf-8')
                 except UnicodeDecodeError:
                     body = base64Dict(body)
+            return body
 
         log.debug("Adding %s to report" % request)
         request_headers = TrueHeaders(request['headers'])
@@ -173,6 +173,8 @@ class HTTPTest(NetTestCase):
         return response
 
     def _processResponseBodyFail(self, failure, request, response):
+        if failure.check(PartialDownloadError):
+            return failure.value.response
         failure_string = handleAllFailures(failure)
         HTTPTest.addToReport(self, request, response,
                              failure_string=failure_string)
@@ -257,17 +259,11 @@ class HTTPTest(NetTestCase):
         else:
             self.processResponseHeaders(response_headers_dict)
 
-        try:
-            content_length = int(response.headers.getRawHeaders('content-length')[0])
-        except Exception:
-            content_length = None
-
-        finished = defer.Deferred()
-        response.deliverBody(BodyReceiver(finished, content_length))
-        finished.addCallback(self._processResponseBody, request,
-                response, body_processor)
+        finished = readBody(response)
         finished.addErrback(self._processResponseBodyFail, request,
                             response)
+        finished.addCallback(self._processResponseBody, request,
+                response, body_processor)
         return finished
 
     def doRequest(self, url, method="GET",
