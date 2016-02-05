@@ -140,8 +140,11 @@ class TestRunDirector(ConfigTestCase):
         def verify_function(entry):
             assert 'queries' in entry
             assert 'control_resolver' in entry
-            assert 'tampering' in entry
-            assert len(entry['tampering']) == 1
+            assert 'errors' in entry
+            assert 'inconsistent' in entry
+            assert 'failures' in entry
+            assert 'successful' in entry
+            assert len(entry['inconsistent']) == 1
 
         yield self.run_helper('blocking/dns_consistency',
                               ['-b', '8.8.8.8:53',
@@ -156,14 +159,7 @@ class TestRunDirector(ConfigTestCase):
             assert 'agent' in entry
             assert 'requests' in entry
             assert 'socksproxy' in entry
-            assert 'tampering' in entry
-            assert 'header_field_name' in entry['tampering']
-            assert 'header_field_number' in entry['tampering']
-            assert 'header_field_value' in entry['tampering']
-            assert 'header_name_capitalization' in entry['tampering']
-            assert 'header_name_diff' in entry['tampering']
-            assert 'request_line_capitalization' in entry['tampering']
-            assert 'total' in entry['tampering']
+            assert 'errors' in entry
 
         yield self.run_helper('manipulation/http_header_field_manipulation',
                               ['-b', 'http://4.15.35.157:80'],
