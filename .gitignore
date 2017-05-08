@@ -58,3 +58,4 @@ secrets/secrets.tar
 GPATH
 GRTAGS
 GTAGS
+var/peer_list.txt

@@ -25,7 +25,7 @@ class PeerHttpReachable(httpt.HTTPTest):
         Check for inputs.
         """
         log.msg(str(self.input.split()))
-        self.ip, self.port = self.input.split(",")
+        self.ip, self.port = self.input.split(":")
         self.http_url = "http://" + self.ip+":"+self.port + '/'
         self.report['http_success'] = False
 
