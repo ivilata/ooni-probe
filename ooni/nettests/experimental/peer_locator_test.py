@@ -52,7 +52,6 @@ class PeerLocator(tcpt.TCPTest):
 
         #first we spawn a http server
 
-        log.msg("running an http server on port %s"%self.localOptions['http_port'])
         http_server_port = self.localOptions['http_port']
         if (http_server_port == 'random'):
             import random
@@ -61,6 +60,7 @@ class PeerLocator(tcpt.TCPTest):
             else:
                 http_server_port = str(random.randint(1025, 65535))
 
+        log.msg("running an http server on port %s"%http_server_port)
         subprocess.Popen(['python', 'ooni/utils/simple_http.py', '--port', http_server_port])
                                 
         self.address, self.port = self.localOptions['backend'].split(":")
