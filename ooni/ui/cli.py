@@ -328,6 +328,7 @@ def createDeck(global_options, url=None):
 
             test_options = subargs_to_options(args)
             test_options['test_name'] = test_name
+
             deck.load({
                 "tasks": [
                     {"ooni": test_options}

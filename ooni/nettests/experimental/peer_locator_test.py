@@ -22,7 +22,15 @@ class PeerLocator(tcpt.TCPTest):
     This test is only to connect to peers and find more peers
     so we can run web connectivity to them. 
     """
-    
+    name = "Peer Locator"
+    version = "0.1"
+    authors = "vmon"
+
+    usageOptions = UsageOptions
+    requiresTor = False
+    requiresRoot = False
+    requiredOptions = ['backend']
+
     usageOptions = UsageOptions
     requiredTestHelpers = {'backend': 'peer_locator_helper'}
     
