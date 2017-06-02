@@ -26,6 +26,7 @@ class HTTPVsHTTPSSpeedTest(httpt.HTTPTest):
         """
         Check for inputs.
         """
+        self.localOptions['withoutbody'] = 1
         if self.input:
             self.scheme_less_url = self.input
 

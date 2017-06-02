@@ -16,7 +16,7 @@ tasks:
 - name: checking connectivity to peer http server
   ooni:
     test_name: peer_http_reachable
-    file: /home/klaymen/.ooni/inputs/data/peer_list.txt
+    file: ~/.ooni/inputs/data/peer_list.txt
 
 - name: checking if torrent downlaod is possible
   ooni:
