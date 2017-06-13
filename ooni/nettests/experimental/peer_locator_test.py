@@ -86,7 +86,9 @@ class PeerLocator(tcpt.TCPTest):
                                 
         self.address, self.port = self.localOptions['backend'].split(":")
         self.port = int(self.port)
-        payload =  http_server_port #http server port, we ultimately need STUN(T) to discover this
+        # Local IP address and HTTP server port,
+        # we ultimately need STUN(T) to discover their public counterparts.
+        payload = '%s:%s' % (self.transport.getHost().host, http_server_port)
         d = self.sendPayload(payload)
         d.addErrback(connection_failed)
         d.addCallback(got_response)
