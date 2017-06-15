@@ -4,7 +4,9 @@ from ooni.templates import tcpt
 
 from twisted.python import usage
 
+import random
 import subprocess #running http server
+import time
 
 class UsageOptions(usage.Options):
     optParameters = [['backend', 'b', 'http://127.0.0.1:57007',
@@ -61,15 +63,26 @@ class PeerLocator(tcpt.TCPTest):
         #first we spawn a http server
 
         http_server_port = self.localOptions['http_port']
-        if (http_server_port == 'random'):
-            import random
-            if (random.randint(0,1) == 0):
-                http_server_port =  '80'
-            else:
-                http_server_port = str(random.randint(1025, 65535))
+        random_port = (http_server_port == 'random')
+        for _ in range(10):  #try at most these times
+            if random_port:  #get random port (with 50% probability for port 80)
+                if (random.randint(0,1) == 0):
+                    http_server_port =  '80'
+                else:
+                    http_server_port = str(random.randint(1025, 65535))
 
-        log.msg("running an http server on port %s"%http_server_port)
-        subprocess.Popen(['python', 'ooni/utils/simple_http.py', '--port', http_server_port])
+            log.msg("running an http server on port %s"%http_server_port)
+            proc = subprocess.Popen(['python', 'ooni/utils/simple_http.py', '--port', http_server_port])
+            time.sleep(1)  #wait for start or crash
+            proc_ret = proc.poll()
+            if proc_ret is None:  #the server is running (or less probably too slow to start)
+                break
+            if proc_ret == 2 and not random_port:  #the forced port was busy
+                raise RuntimeError("failed to bind to requested port %s" % http_server_port)
+            #retry with another port
+        else:
+            #fail, do not report a failed port or a port not used by us
+            raise RuntimeError("exceeded retries for running an HTTP server")
                                 
         self.address, self.port = self.localOptions['backend'].split(":")
         self.port = int(self.port)
