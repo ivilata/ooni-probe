@@ -1,12 +1,43 @@
 from twisted.internet.error import ConnectionRefusedError
+from ooni.common.ip_utils import is_private_address
 from ooni.utils import log
 from ooni.templates import tcpt
 
 from twisted.python import usage
 
+import ipaddr
+
 import random
+import re
 import subprocess #running http server
 import time
+import urllib
+
+# HTTP services which reply with the client's IP address in plain text.
+_ip_ident_services = [
+    'https://ifconfig.co/',
+    'https://ident.me/',
+    'https://icanhazip.com/',
+    'http://ipecho.net/plain']
+_max_ip_len = len('0123:4567:89ab:cdef:0123:4567:89ab:cdef')
+def get_my_public_ip():
+    """Return publicly visible IP address as a string.
+
+    If it cannot be detected, return `None`.
+    """
+    for url in _ip_ident_services:
+        try:
+            with urllib.urlopen(url) as conn:
+                ip = conn.read(_max_ip_len)
+                try:
+                    ipaddr.IP(ip)
+                except ValueError:
+                    continue
+                else:
+                    return ip
+        except Exception:
+            continue
+    return None  # no valid address found
 
 class UsageOptions(usage.Options):
     optParameters = [['backend', 'b', 'http://127.0.0.1:57007',
@@ -60,6 +91,14 @@ class PeerLocator(tcpt.TCPTest):
             failure.trap(ConnectionRefusedError)
             log.msg("Connection Refused")
 
+        #identify whether we are behind NAT
+        local_ip = self.transport.getHost().host
+        if is_private_address(local_ip):
+            behind_nat = true
+        else:  # still check our visible address
+            public_ip = get_my_public_ip()
+            behind_nat = (public_ip != local_ip)
+
         #first we spawn a http server
 
         http_server_port = self.localOptions['http_port']
@@ -88,7 +127,7 @@ class PeerLocator(tcpt.TCPTest):
         self.port = int(self.port)
         # Local IP address and HTTP server port,
         # we ultimately need STUN(T) to discover their public counterparts.
-        payload = '%s:%s' % (self.transport.getHost().host, http_server_port)
+        payload = '%s:%s' % (local_ip, http_server_port)
         d = self.sendPayload(payload)
         d.addErrback(connection_failed)
         d.addCallback(got_response)
