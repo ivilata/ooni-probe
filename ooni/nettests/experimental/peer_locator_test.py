@@ -95,7 +95,7 @@ class PeerLocator(tcpt.TCPTest):
         local_ip = self.transport.getHost().host
         if is_private_address(local_ip):
             behind_nat = true
-        else:  # still check our visible address
+        else:  #still check our visible address (if none, assume NAT)
             public_ip = get_my_public_ip()
             behind_nat = (public_ip != local_ip)
 
