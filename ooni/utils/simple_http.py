@@ -24,34 +24,38 @@ class Hello(Resource):
         with open('var/big_file.dat', 'r') as big_file:
             return big_file.read()
 
-listen_port = DEFAULT_PORT
-use_upnp = False
+def main():
+    listen_port = DEFAULT_PORT
+    use_upnp = False
 
-for i in range(0, len(sys.argv)):
-    arg = sys.argv[i]
-    if arg == "--port":
-        listen_port = int(sys.argv[i+1])
-    elif arg == "--upnp":
-        use_upnp = True
-    elif arg == "--noupnp":
-        use_upnp = False
+    for i in range(0, len(sys.argv)):
+        arg = sys.argv[i]
+        if arg == "--port":
+            listen_port = int(sys.argv[i+1])
+        elif arg == "--upnp":
+            use_upnp = True
+        elif arg == "--noupnp":
+            use_upnp = False
 
-if use_upnp:
-    upnp = UPnP()
-    upnp.discoverdelay = 10
-    ndevs = upnp.discover()
-    if ndevs == 0:
-        error("No UPnP IGD devices were discovered", EXIT_UPNP_FAILED)
-    if not upnp.addportmapping(listen_port, 'TCP', upnp.lanaddr, listen_port,
-                               "OONI simple HTTP peer", ''):
-        error("Failed to create UPnP port mapping", EXIT_UPNP_FAILED)
+    if use_upnp:
+        upnp = UPnP()
+        upnp.discoverdelay = 10
+        ndevs = upnp.discover()
+        if ndevs == 0:
+            error("No UPnP IGD devices were discovered", EXIT_UPNP_FAILED)
+        if not upnp.addportmapping(listen_port, 'TCP', upnp.lanaddr, listen_port,
+                                   "OONI simple HTTP peer", ''):
+            error("Failed to create UPnP port mapping", EXIT_UPNP_FAILED)
 
-## XXXX configure auto-removal of mapping
+    ## XXXX configure auto-removal of mapping
 
-site = server.Site(Hello())
-try:
-    reactor.listenTCP(listen_port, site)
-    reactor.run()
-except CannotListenError:
-    error("Someone else is already listening on " + str(listen_port),
-          EXIT_BIND_FAILED)
+    site = server.Site(Hello())
+    try:
+        reactor.listenTCP(listen_port, site)
+        reactor.run()
+    except CannotListenError:
+        error("Someone else is already listening on " + str(listen_port),
+              EXIT_BIND_FAILED)
+
+if __name__ == '__main__':
+    main()
