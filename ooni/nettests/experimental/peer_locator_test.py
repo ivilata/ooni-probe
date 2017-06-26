@@ -110,7 +110,9 @@ class PeerLocator(tcpt.TCPTest):
                     http_server_port = str(random.randint(1025, 65535))
 
             log.msg("running an http server on port %s"%http_server_port)
-            proc = subprocess.Popen(['python', 'ooni/utils/simple_http.py', '--port', http_server_port])
+            proc = subprocess.Popen([
+                'python', 'ooni/utils/simple_http.py', '--port', http_server_port,
+                '--upnp' if behind_nat else '--noupnp'])
             time.sleep(1)  #wait for start or crash
             proc_ret = proc.poll()
             if proc_ret is None:  #the server is running (or less probably too slow to start)
