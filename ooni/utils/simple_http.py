@@ -28,6 +28,7 @@ def main():
     listen_port = DEFAULT_PORT
     use_upnp = False
 
+    # Parse command line options.
     for i in range(0, len(sys.argv)):
         arg = sys.argv[i]
         if arg == "--port":
@@ -37,6 +38,7 @@ def main():
         elif arg == "--noupnp":
             use_upnp = False
 
+    # Configure a UPnP port mapping if requested.
     if use_upnp:
         upnp = UPnP()
         upnp.discoverdelay = 10
@@ -49,6 +51,7 @@ def main():
 
     ## XXXX configure auto-removal of mapping
 
+    # Run the HTTP server.
     site = server.Site(Hello())
     try:
         reactor.listenTCP(listen_port, site)
