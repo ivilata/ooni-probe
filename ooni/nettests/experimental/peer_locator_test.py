@@ -96,8 +96,7 @@ class PeerLocator(tcpt.TCPTest):
         if is_private_address(local_ip):
             behind_nat = True
         else:  #still check our visible address (if none, assume NAT)
-            public_ip = get_my_public_ip()
-            behind_nat = (public_ip != local_ip)
+            behind_nat = (get_my_public_ip() != local_ip)
 
         #first we spawn a http server
 
