@@ -119,6 +119,8 @@ class PeerLocator(tcpt.TCPTest):
                 break
             if proc_ret == 2 and not random_port:  #the forced port was busy
                 raise RuntimeError("failed to bind to requested port %s" % http_server_port)
+            if proc_ret == 3:  #issues with UPnP port mapping
+                raise RuntimeError("failed to map port using UPnP")
             #retry with another port
         else:
             #fail, do not report a failed port or a port not used by us
