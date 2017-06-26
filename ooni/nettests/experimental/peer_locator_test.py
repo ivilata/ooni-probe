@@ -117,9 +117,9 @@ class PeerLocator(tcpt.TCPTest):
             proc_ret = proc.poll()
             if proc_ret is None:  #the server is running (or less probably too slow to start)
                 break
-            if proc_ret == 2 and not random_port:  #the forced port was busy
+            elif proc_ret == 2 and not random_port:  #the forced port was busy
                 raise RuntimeError("failed to bind to requested port %s" % http_server_port)
-            if proc_ret == 3:  #issues with UPnP port mapping
+            elif proc_ret == 3:  #issues with UPnP port mapping
                 raise RuntimeError("failed to map port using UPnP")
             #retry with another port
         else:
