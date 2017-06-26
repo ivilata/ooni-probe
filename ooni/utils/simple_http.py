@@ -45,6 +45,7 @@ def main():
         ndevs = upnp.discover()
         if ndevs == 0:
             error("No UPnP IGD devices were discovered", EXIT_UPNP_FAILED)
+        upnp.selectigd()
         if not upnp.addportmapping(listen_port, 'TCP', upnp.lanaddr, listen_port,
                                    "OONI simple HTTP peer", ''):
             error("Failed to create UPnP port mapping", EXIT_UPNP_FAILED)
