@@ -42,15 +42,15 @@ def main():
     if use_upnp:
         upnp = UPnP()
         upnp.discoverdelay = 10
-        ndevs = upnp.discover()
-        if ndevs == 0:
+        if upnp.discover() < 1:
             error("No UPnP IGD devices were discovered", EXIT_UPNP_FAILED)
         upnp.selectigd()
-        if not upnp.addportmapping(listen_port, 'TCP', upnp.lanaddr, listen_port,
-                                   "OONI simple HTTP peer", ''):
+        if not upnp.addportmapping(
+                listen_port, 'TCP', upnp.lanaddr, listen_port,
+                "OONI simple HTTP peer", ''):
             error("Failed to create UPnP port mapping", EXIT_UPNP_FAILED)
 
-    ## XXXX configure auto-removal of mapping
+        ## XXXX configure auto-removal of mapping
 
     # Run the HTTP server.
     site = server.Site(Hello())
