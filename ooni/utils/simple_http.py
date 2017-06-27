@@ -5,6 +5,7 @@ from twisted.internet.error import CannotListenError
 from twisted.web import static, server
 from twisted.web.resource import Resource
 
+import atexit
 import sys
 
 DEFAULT_PORT = 8000
@@ -49,8 +50,8 @@ def main():
                 listen_port, 'TCP', upnp.lanaddr, listen_port,
                 "OONI simple HTTP peer", ''):
             error("Failed to create UPnP port mapping", EXIT_UPNP_FAILED)
-
-        ## XXXX configure auto-removal of mapping
+        # Remove the configured port mapping on exit.
+        atexit.register(upnp.deleteportmapping, listen_port, 'TCP')
 
     # Run the HTTP server.
     site = server.Site(Hello())
